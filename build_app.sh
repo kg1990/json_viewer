@@ -26,6 +26,13 @@ swiftc -parse-as-library -o "$EXEC" \
 
 echo "COMPILE OK"
 
+# Copy the app icon into the bundle (generate it first if missing).
+if [ ! -f Resources/AppIcon.icns ]; then
+    echo "AppIcon.icns missing -> generating via tools/make_icon.sh"
+    ./tools/make_icon.sh >/dev/null
+fi
+cp Resources/AppIcon.icns "$RES_DIR/AppIcon.icns"
+
 # Write Info.plist.
 cat > "$PLIST" <<'PLIST_EOF'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -38,6 +45,8 @@ cat > "$PLIST" <<'PLIST_EOF'
     <string>com.jsonviewer.app</string>
     <key>CFBundleName</key>
     <string>JSONViewer</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
