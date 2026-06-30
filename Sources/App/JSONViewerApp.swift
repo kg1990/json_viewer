@@ -20,5 +20,11 @@ struct JSONViewerApp: App {
                 .environmentObject(model)
         }
         .windowResizability(.contentMinSize)
+
+        Window("JSON Compare", id: "compare") {
+            CompareView()
+                .environmentObject(model)
+        }
+        .windowResizability(.contentMinSize)
     }
 }

@@ -70,6 +70,12 @@ final class AppModel: ObservableObject {
         didSet { transformOutput = nil }
     }
     @Published var pathQuery: String = ""
+
+    /// Left/right inputs for the JSON Compare window (D3). Prefilled with a tiny
+    /// sample so the window isn't empty on first open.
+    @Published var compareA: String = "{\n  \"name\": \"alice\",\n  \"age\": 30,\n  \"tags\": [\"a\", \"b\"]\n}"
+    @Published var compareB: String = "{\n  \"name\": \"alice\",\n  \"age\": 31,\n  \"tags\": [\"a\", \"c\"],\n  \"active\": true\n}"
+
     @Published var indent: IndentOption = .twoSpaces
     @Published var status: StatusMessage = .none
 

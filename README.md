@@ -10,6 +10,10 @@ A two-pane window: edit JSON on the left, see formatted output on the right.
 - **Minify** — collapse the input to a single compact line.
 - **Validate** — check the input and show a clear inline status: green "Valid JSON",
   or red `line L, column C: message` on a parse error.
+- **Compare** — open a JSON Compare window with two editors (A original / B
+  compare), a summary of added/removed/changed counts, and a recursive tree
+  diff that highlights additions (green), removals (red), and changes (orange,
+  shown as `old → new`).
 - **Clear** — empty both panes.
 - **Indent picker** — 2 Spaces / 4 Spaces / Tab, applied to Beautify and to
   extraction results.

@@ -37,6 +37,11 @@ struct ContentView: View {
             Button(action: model.validate) {
                 Label("Validate", systemImage: "checkmark.seal")
             }
+            Button {
+                openWindow(id: "compare")
+            } label: {
+                Label("Compare", systemImage: "arrow.left.arrow.right")
+            }
             Button(action: model.clear) {
                 Label("Clear", systemImage: "trash")
             }

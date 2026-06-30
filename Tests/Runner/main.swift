@@ -384,6 +384,138 @@ func runTransformsTests() {
     checkThrows(try Transforms.base64GunzipDecode("@@not base64@@"), "gunzip invalid base64 throws")
 }
 
+// MARK: - Diff tests
+
+func runDiffTests() {
+    // Helper: parse or fail.
+    func p(_ s: String) -> JSONValue {
+        return checkNoThrow(try JSONParser.parse(s), "diff parse \(s)") ?? .null
+    }
+    // Helper: child of a DiffNode by label.
+    func child(_ node: DiffNode, _ label: String) -> DiffNode? {
+        return node.children.first { $0.label == label }
+    }
+
+    // AC-3 identical nested JSON -> {0,0,0}, root unchanged.
+    let nested = "{\"a\":[1,{\"b\":null},[true]],\"c\":{\"d\":\"x\"}}"
+    let ac3 = JSONDiff.compare(p(nested), p(nested))
+    checkEqual(JSONDiff.summarize(ac3), DiffSummary(added: 0, removed: 0, changed: 0), "AC-3 identical summary")
+    checkEqual(ac3.status, .unchanged, "AC-3 root unchanged")
+    checkEqual(ac3.label, "$", "AC-3 root label $")
+
+    // AC-4 {"a":1} vs {"a":1,"b":2} -> {1,0,0}; reverse -> {0,1,0}.
+    let ac4a = JSONDiff.compare(p("{\"a\":1}"), p("{\"a\":1,\"b\":2}"))
+    checkEqual(JSONDiff.summarize(ac4a), DiffSummary(added: 1, removed: 0, changed: 0), "AC-4 added key")
+    checkEqual(child(ac4a, "b")?.status, .added, "AC-4 b added")
+    checkEqual(child(ac4a, "b")?.newValue, .number("2"), "AC-4 b newValue 2")
+    let ac4b = JSONDiff.compare(p("{\"a\":1,\"b\":2}"), p("{\"a\":1}"))
+    checkEqual(JSONDiff.summarize(ac4b), DiffSummary(added: 0, removed: 1, changed: 0), "AC-4 removed key")
+    checkEqual(child(ac4b, "b")?.status, .removed, "AC-4 b removed")
+    checkEqual(child(ac4b, "b")?.oldValue, .number("2"), "AC-4 b oldValue 2")
+
+    // AC-5 {"a":1} vs {"a":2} -> {0,0,1}; "a" child changed with old 1 / new 2.
+    let ac5 = JSONDiff.compare(p("{\"a\":1}"), p("{\"a\":2}"))
+    checkEqual(JSONDiff.summarize(ac5), DiffSummary(added: 0, removed: 0, changed: 1), "AC-5 changed scalar")
+    checkEqual(child(ac5, "a")?.status, .changed, "AC-5 a changed")
+    checkEqual(child(ac5, "a")?.oldValue, .number("1"), "AC-5 a oldValue 1")
+    checkEqual(child(ac5, "a")?.newValue, .number("2"), "AC-5 a newValue 2")
+
+    // AC-6 key order ignored.
+    let ac6 = JSONDiff.compare(p("{\"a\":1,\"b\":2}"), p("{\"b\":2,\"a\":1}"))
+    checkEqual(JSONDiff.summarize(ac6), DiffSummary(added: 0, removed: 0, changed: 0), "AC-6 key order ignored")
+    checkEqual(ac6.status, .unchanged, "AC-6 root unchanged")
+
+    // AC-7 1 vs 1.0 unchanged; 1 vs 2 changed.
+    let ac7a = JSONDiff.compare(p("1"), p("1.0"))
+    checkEqual(JSONDiff.summarize(ac7a), DiffSummary(added: 0, removed: 0, changed: 0), "AC-7 1 == 1.0")
+    checkEqual(ac7a.status, .unchanged, "AC-7 1==1.0 root unchanged")
+    // also 1e0
+    checkEqual(JSONDiff.compare(p("1"), p("1e0")).status, .unchanged, "AC-7 1 == 1e0")
+    let ac7b = JSONDiff.compare(p("1"), p("2"))
+    checkEqual(JSONDiff.summarize(ac7b), DiffSummary(added: 0, removed: 0, changed: 1), "AC-7 1 != 2")
+
+    // AC-8 {"a":{"x":1}} vs {"a":{"x":2}} -> {0,0,1}, nested changed propagation.
+    let ac8 = JSONDiff.compare(p("{\"a\":{\"x\":1}}"), p("{\"a\":{\"x\":2}}"))
+    checkEqual(JSONDiff.summarize(ac8), DiffSummary(added: 0, removed: 0, changed: 1), "AC-8 nested changed")
+    checkEqual(ac8.status, .changed, "AC-8 root changed")
+    checkEqual(child(ac8, "a")?.status, .changed, "AC-8 a changed")
+    checkEqual(child(ac8, "a")?.kind, .object, "AC-8 a kind object")
+    if let aNode = child(ac8, "a") {
+        checkEqual(child(aNode, "x")?.status, .changed, "AC-8 x changed")
+        checkEqual(child(aNode, "x")?.kind, .leaf, "AC-8 x kind leaf")
+    }
+
+    // AC-9 array diffs.
+    let ac9a = JSONDiff.compare(p("[1,2,3]"), p("[1,2]"))
+    checkEqual(JSONDiff.summarize(ac9a), DiffSummary(added: 0, removed: 1, changed: 0), "AC-9 array removed")
+    checkEqual(child(ac9a, "[2]")?.status, .removed, "AC-9 [2] removed")
+    let ac9b = JSONDiff.compare(p("[1,2]"), p("[1,2,3]"))
+    checkEqual(JSONDiff.summarize(ac9b), DiffSummary(added: 1, removed: 0, changed: 0), "AC-9 array added")
+    checkEqual(child(ac9b, "[2]")?.status, .added, "AC-9 [2] added")
+    let ac9c = JSONDiff.compare(p("[1,2,3]"), p("[1,9,3]"))
+    checkEqual(JSONDiff.summarize(ac9c), DiffSummary(added: 0, removed: 0, changed: 1), "AC-9 array changed")
+    checkEqual(child(ac9c, "[1]")?.status, .changed, "AC-9 [1] changed")
+    checkEqual(child(ac9c, "[0]")?.status, .unchanged, "AC-9 [0] unchanged")
+
+    // AC-10 {"a":1} vs {"a":[1]} -> {0,0,1}, type change, no recursion.
+    let ac10 = JSONDiff.compare(p("{\"a\":1}"), p("{\"a\":[1]}"))
+    checkEqual(JSONDiff.summarize(ac10), DiffSummary(added: 0, removed: 0, changed: 1), "AC-10 type change")
+    checkEqual(child(ac10, "a")?.status, .changed, "AC-10 a changed")
+    checkEqual(child(ac10, "a")?.kind, .leaf, "AC-10 a kind leaf")
+    check((child(ac10, "a")?.children.isEmpty) ?? false, "AC-10 a no children (no recursion)")
+    checkEqual(child(ac10, "a")?.oldValue, .number("1"), "AC-10 a oldValue scalar")
+    checkEqual(child(ac10, "a")?.newValue, .array([.number("1")]), "AC-10 a newValue array")
+
+    // AC-11 compare(text,text) works; invalid JSON throws.
+    if let r = checkNoThrow(try JSONDiff.compare("{\"a\":1}", "{\"a\":2}"), "AC-11 text compare") {
+        checkEqual(JSONDiff.summarize(r), DiffSummary(added: 0, removed: 0, changed: 1), "AC-11 text compare summary")
+    }
+    checkThrows(try JSONDiff.compare("{bad", "{\"a\":1}"), "AC-11 invalid left throws")
+    checkThrows(try JSONDiff.compare("{\"a\":1}", "not json"), "AC-11 invalid right throws")
+
+    // AC-12 empty containers / null / type change scalar.
+    checkEqual(JSONDiff.summarize(JSONDiff.compare(p("{}"), p("{}"))), DiffSummary(added: 0, removed: 0, changed: 0), "AC-12 {} vs {}")
+    checkEqual(JSONDiff.compare(p("{}"), p("{}")).status, .unchanged, "AC-12 {} unchanged")
+    checkEqual(JSONDiff.summarize(JSONDiff.compare(p("[]"), p("[]"))), DiffSummary(added: 0, removed: 0, changed: 0), "AC-12 [] vs []")
+    checkEqual(JSONDiff.compare(p("[]"), p("[]")).status, .unchanged, "AC-12 [] unchanged")
+    checkEqual(JSONDiff.compare(p("null"), p("null")).status, .unchanged, "AC-12 null unchanged")
+    let ac12 = JSONDiff.compare(p("1"), p("\"1\""))
+    checkEqual(JSONDiff.summarize(ac12), DiffSummary(added: 0, removed: 0, changed: 1), "AC-12 number vs string type change")
+    checkEqual(ac12.status, .changed, "AC-12 1 vs \"1\" changed")
+    checkEqual(ac12.kind, .leaf, "AC-12 1 vs \"1\" leaf")
+}
+
+func runDiffNumberTests() {
+    func p(_ s: String) -> JSONValue {
+        return checkNoThrow(try JSONParser.parse(s), "diffnum parse \(s)") ?? .null
+    }
+    func summ(_ a: String, _ b: String) -> DiffSummary {
+        return JSONDiff.summarize(JSONDiff.compare(p(a), p(b)))
+    }
+    let zero = DiffSummary(added: 0, removed: 0, changed: 0)
+    let changed1 = DiffSummary(added: 0, removed: 0, changed: 1)
+
+    // AC-13 huge ints (> 2^53) that differ must be reported changed.
+    checkEqual(summ("100000000000000000001", "100000000000000000002"), changed1,
+               "AC-13 huge int 20...01 vs 20...02 changed")
+    checkEqual(summ("9007199254740992", "9007199254740993"), changed1,
+               "AC-13 2^53 vs 2^53+1 changed")
+
+    // AC-14 numeric-equal forms must be unchanged.
+    checkEqual(summ("1", "1.0"), zero, "AC-14 1 == 1.0")
+    checkEqual(summ("1", "1e0"), zero, "AC-14 1 == 1e0")
+    checkEqual(summ("10e-1", "1"), zero, "AC-14 10e-1 == 1")
+    checkEqual(summ("0.0", "0"), zero, "AC-14 0.0 == 0")
+    checkEqual(summ("-0", "0"), zero, "AC-14 -0 == 0")
+    // Extra negative-zero / exponent equivalences.
+    checkEqual(summ("0e5", "0"), zero, "AC-14 0e5 == 0")
+    checkEqual(summ("-0.0", "0"), zero, "AC-14 -0.0 == 0")
+
+    // AC-15 still-changed cases.
+    checkEqual(summ("1", "2"), changed1, "AC-15 1 != 2")
+    checkEqual(summ("1.5", "2"), changed1, "AC-15 1.5 != 2")
+}
+
 // MARK: - main
 
 runParserTests()
@@ -391,6 +523,8 @@ runFormatterTests()
 runValidatorTests()
 runJSONPathTests()
 runTransformsTests()
+runDiffTests()
+runDiffNumberTests()
 
 print("RAN \(checksRun) checks, \(failures) failures")
 exit(failures == 0 ? 0 : 1)
