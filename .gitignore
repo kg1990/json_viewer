@@ -1,0 +1,14 @@
+# Build artifacts
+build/
+.build/
+*.app
+*.dylib
+*.swiftmodule
+
+# Distributables
+dist/
+*.zip
+*.dmg
+
+# macOS
+.DS_Store
