@@ -8,6 +8,6 @@ cd "$(dirname "$0")"
 TMPBIN="$(mktemp -t jsoncore_tests).bin"
 trap 'rm -f "$TMPBIN"' EXIT
 
-swiftc -o "$TMPBIN" Sources/JSONCore/*.swift Tests/Runner/main.swift
+swiftc -o "$TMPBIN" Sources/JSONCore/*.swift Tests/Runner/main.swift -lz
 
 "$TMPBIN"

@@ -15,6 +15,21 @@ A two-pane window: edit JSON on the left, see formatted output on the right.
   extraction results.
 - Beautify/Minify on invalid input shows the parse error instead of garbage output.
 
+### Transform tools
+
+A row of one-click text transforms (above the panes). Each applies to the input
+and shows its result in the Output pane with a **left line-number gutter**
+(monospaced, read-only, selectable). On error the message is shown in red. The
+output reverts to the JSON Text/Tree view as soon as you edit the input or click
+Beautify / Minify / Validate / Clear.
+
+- **JSON Escape** / **JSON Unescape** — escape/unescape JSON string contents.
+- **BASE64 Encode** / **BASE64 Decode** — Base64 of UTF-8 bytes.
+- **URL Escape** / **URL Unescape** — percent-encoding.
+- **Gzip&BASE64Encode** / **BASE64Decode&Ungzip** — **real gzip** (via zlib),
+  interoperable with the system `gunzip` / `gzip` tools.
+- **String UnEscape** — decode escape sequences without stripping outer quotes.
+
 ### Extraction
 
 Enter a path in the **Path** field and press **Extract** (or Cmd+Return). Results

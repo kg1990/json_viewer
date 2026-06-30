@@ -303,12 +303,94 @@ func runJSONPathTests() {
                [.number("11"), .number("21")], "deep nested wildcard then index")
 }
 
+// MARK: - Transforms tests
+
+func runTransformsTests() {
+    // AC-3 base64
+    checkEqual(Transforms.base64Encode("hello"), "aGVsbG8=", "base64 hello")
+    // round-trip ASCII / Chinese / emoji
+    for s in ["hello", "", "ascii 123 !@#", "你好世界", "😀🚀✨", "混合 mixed 文字 😀"] {
+        let enc = Transforms.base64Encode(s)
+        checkEqual(checkNoThrow(try Transforms.base64Decode(enc), "b64 decode \(s)"), s, "base64 round-trip \(s)")
+    }
+
+    // AC-4 url
+    checkEqual(Transforms.urlEscape("a b&c"), "a%20b%26c", "urlEscape a b&c")
+    for s in ["a b&c", "", "plain", "你好 世界", "a=1&b=2 c/d?e#f", "tilde~dash-dot.under_"] {
+        let enc = Transforms.urlEscape(s)
+        checkEqual(checkNoThrow(try Transforms.urlUnescape(enc), "url decode \(s)"), s, "url round-trip \(s)")
+    }
+    // unreserved chars stay literal
+    checkEqual(Transforms.urlEscape("AZaz09-_.~"), "AZaz09-_.~", "url unreserved untouched")
+    checkThrows(try Transforms.urlUnescape("%2"), "urlUnescape %2 throws")
+    checkThrows(try Transforms.urlUnescape("%GG"), "urlUnescape %GG throws")
+    checkThrows(try Transforms.urlUnescape("abc%"), "urlUnescape trailing % throws")
+    // case-insensitive hex decode
+    checkEqual(checkNoThrow(try Transforms.urlUnescape("%2f%2F"), "url ci hex"), "//", "url case-insensitive hex")
+
+    // AC-5 json escape / unescape
+    checkEqual(Transforms.jsonEscape("a\"b\n"), "a\\\"b\\n", "jsonEscape a\"b\\n")
+    // do not escape slash
+    checkEqual(Transforms.jsonEscape("a/b"), "a/b", "jsonEscape leaves slash")
+    // control char < 0x20 -> \uXXXX
+    checkEqual(Transforms.jsonEscape("\u{01}"), "\\u0001", "jsonEscape control char")
+    // all special escapes
+    checkEqual(Transforms.jsonEscape("\\\t\r\u{08}\u{0C}"), "\\\\\\t\\r\\b\\f", "jsonEscape specials")
+    for s in ["a\"b\n", "", "plain text", "tab\there", "ctrl\u{01}\u{1f}end", "你好\n世界", "emoji 😀 end", "back\\slash"] {
+        let esc = Transforms.jsonEscape(s)
+        checkEqual(checkNoThrow(try Transforms.jsonUnescape(esc), "jsonUnescape \(s)"), s, "jsonEscape/Unescape round-trip \(s)")
+    }
+    // AC-5 quote stripping
+    checkEqual(checkNoThrow(try Transforms.jsonUnescape("\"hi\""), "jsonUnescape quoted"), "hi", "jsonUnescape strips outer quotes")
+    // surrogate pair decode
+    checkEqual(checkNoThrow(try Transforms.jsonUnescape("\\uD83D\\uDE00"), "jsonUnescape surrogate"), "😀", "jsonUnescape surrogate pair")
+
+    // AC-6 string unescape
+    checkEqual(checkNoThrow(try Transforms.stringUnescape("\\u0041"), "stringUnescape u0041"), "A", "stringUnescape \\u0041 == A")
+    // jsonUnescape strips quotes; stringUnescape does NOT
+    checkEqual(checkNoThrow(try Transforms.jsonUnescape("\"hi\""), "jsonUnescape quoted2"), "hi", "jsonUnescape -> hi")
+    checkEqual(checkNoThrow(try Transforms.stringUnescape("\"hi\""), "stringUnescape quoted2"), "\"hi\"", "stringUnescape -> \"hi\"")
+    // unknown escape / malformed \u throw (both functions share decoder)
+    checkThrows(try Transforms.stringUnescape("\\x"), "stringUnescape unknown escape throws")
+    checkThrows(try Transforms.jsonUnescape("\\u12"), "jsonUnescape malformed \\u throws")
+    checkThrows(try Transforms.stringUnescape("\\uZZZZ"), "stringUnescape non-hex \\u throws")
+    checkThrows(try Transforms.stringUnescape("\\uD83D"), "stringUnescape lone high surrogate throws")
+    checkThrows(try Transforms.stringUnescape("\\uDE00"), "stringUnescape lone low surrogate throws")
+
+    // AC-7 gzip round-trip
+    checkEqual(checkNoThrow(try Transforms.base64GunzipDecode(checkNoThrow(try Transforms.gzipBase64Encode("hello"), "gzip hello") ?? ""), "gunzip hello"),
+               "hello", "gzip round-trip hello")
+    for s in ["", "a", "hello world", "你好世界 gzip 测试 😀"] {
+        if let enc = checkNoThrow(try Transforms.gzipBase64Encode(s), "gzip enc \(s)") {
+            checkEqual(checkNoThrow(try Transforms.base64GunzipDecode(enc), "gzip dec \(s)"), s, "gzip round-trip \(s)")
+        }
+    }
+
+    // AC-8 long text (5KB) + Chinese
+    let long = String(repeating: "The quick brown fox 你好 😀 1234567890\n", count: 150)
+    check(long.utf8.count >= 5000, "long text >= 5KB")
+    if let enc = checkNoThrow(try Transforms.gzipBase64Encode(long), "gzip long enc") {
+        checkEqual(checkNoThrow(try Transforms.base64GunzipDecode(enc), "gzip long dec"), long, "gzip round-trip long text")
+    }
+    let chinese = String(repeating: "测试中文压缩内容。", count: 300)
+    if let enc = checkNoThrow(try Transforms.gzipBase64Encode(chinese), "gzip chinese enc") {
+        checkEqual(checkNoThrow(try Transforms.base64GunzipDecode(enc), "gzip chinese dec"), chinese, "gzip round-trip chinese")
+    }
+
+    // AC-9 errors
+    checkThrows(try Transforms.base64Decode("not valid base64!!!"), "invalid base64 throws")
+    checkThrows(try Transforms.urlUnescape("%ZZ"), "invalid percent throws")
+    checkThrows(try Transforms.base64GunzipDecode(Transforms.base64Encode("this is plainly not gzip")), "non-gzip bytes throw")
+    checkThrows(try Transforms.base64GunzipDecode("@@not base64@@"), "gunzip invalid base64 throws")
+}
+
 // MARK: - main
 
 runParserTests()
 runFormatterTests()
 runValidatorTests()
 runJSONPathTests()
+runTransformsTests()
 
 print("RAN \(checksRun) checks, \(failures) failures")
 exit(failures == 0 ? 0 : 1)

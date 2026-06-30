@@ -21,7 +21,8 @@ mkdir -p "$RES_DIR"
 echo "Compiling JSONCore + App -> $EXEC"
 swiftc -parse-as-library -o "$EXEC" \
     Sources/JSONCore/*.swift \
-    Sources/App/*.swift
+    Sources/App/*.swift \
+    -lz
 
 echo "COMPILE OK"
 
@@ -40,7 +41,7 @@ cat > "$PLIST" <<'PLIST_EOF'
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.0</string>
+    <string>1.1.0</string>
     <key>LSMinimumSystemVersion</key>
     <string>13.0</string>
     <key>NSPrincipalClass</key>

@@ -7,6 +7,6 @@ set -euo pipefail
 cd "$(dirname "$0")"
 mkdir -p build
 
-swiftc -emit-module -emit-library -o build/libJSONCore.dylib Sources/JSONCore/*.swift
+swiftc -emit-module -emit-library -o build/libJSONCore.dylib Sources/JSONCore/*.swift -lz
 
 echo "BUILD OK: build/libJSONCore.dylib"

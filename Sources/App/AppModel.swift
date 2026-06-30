@@ -48,6 +48,12 @@ enum ParsedInput {
     case failure(String)
 }
 
+/// Output produced by a Transform: either the result text or an error message.
+enum TransformOutput {
+    case text(String)
+    case error(String)
+}
+
 /// One extraction result rendered in a separate result window.
 struct ResultPayload: Identifiable, Equatable {
     let id = UUID()
@@ -60,7 +66,9 @@ struct ResultPayload: Identifiable, Equatable {
 /// App-wide observable model. Holds the editor text, indent choice, status,
 /// and the latest extraction payload consumed by the result window.
 final class AppModel: ObservableObject {
-    @Published var inputText: String = ""
+    @Published var inputText: String = "" {
+        didSet { transformOutput = nil }
+    }
     @Published var pathQuery: String = ""
     @Published var indent: IndentOption = .twoSpaces
     @Published var status: StatusMessage = .none
@@ -86,9 +94,24 @@ final class AppModel: ObservableObject {
     /// Latest extraction payload. The result window renders this.
     @Published var latestResult: ResultPayload?
 
+    /// Latest Transform output. `nil` => the Output pane shows the JSON view.
+    @Published var transformOutput: TransformOutput? = nil
+
+    /// Run a Transform closure, routing success/error into `transformOutput`.
+    func runTransform(_ produce: () throws -> String) {
+        do {
+            transformOutput = .text(try produce())
+        } catch let e as TransformError {
+            transformOutput = .error(e.message)
+        } catch {
+            transformOutput = .error("\(error)")
+        }
+    }
+
     // MARK: - Toolbar actions
 
     func beautify() {
+        transformOutput = nil
         formatMode = .beautify
         do {
             _ = try JSONFormatter.prettyPrint(inputText, indent: indent.style)
@@ -101,6 +124,7 @@ final class AppModel: ObservableObject {
     }
 
     func minify() {
+        transformOutput = nil
         formatMode = .minify
         do {
             _ = try JSONFormatter.minify(inputText)
@@ -113,6 +137,7 @@ final class AppModel: ObservableObject {
     }
 
     func validate() {
+        transformOutput = nil
         switch JSONValidator.validate(inputText) {
         case .valid:
             status = .valid
@@ -124,6 +149,7 @@ final class AppModel: ObservableObject {
     func clear() {
         inputText = ""
         status = .none
+        transformOutput = nil
     }
 
     /// Run the path query against the current input and produce a ResultPayload.

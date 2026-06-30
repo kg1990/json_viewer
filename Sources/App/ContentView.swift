@@ -15,6 +15,8 @@ struct ContentView: View {
             Divider()
             statusBar
             Divider()
+            transformBar
+            Divider()
             panes
             Divider()
             extractionBar
@@ -51,6 +53,44 @@ struct ContentView: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
+    }
+
+    // MARK: - Transform tools row (D3)
+
+    private var transformBar: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                Button("JSON Escape") {
+                    model.runTransform { Transforms.jsonEscape(model.inputText) }
+                }
+                Button("JSON Unescape") {
+                    model.runTransform { try Transforms.jsonUnescape(model.inputText) }
+                }
+                Button("BASE64 Encode") {
+                    model.runTransform { Transforms.base64Encode(model.inputText) }
+                }
+                Button("BASE64 Decode") {
+                    model.runTransform { try Transforms.base64Decode(model.inputText) }
+                }
+                Button("URL Escape") {
+                    model.runTransform { Transforms.urlEscape(model.inputText) }
+                }
+                Button("URL Unescape") {
+                    model.runTransform { try Transforms.urlUnescape(model.inputText) }
+                }
+                Button("Gzip&BASE64Encode") {
+                    model.runTransform { try Transforms.gzipBase64Encode(model.inputText) }
+                }
+                Button("BASE64Decode&Ungzip") {
+                    model.runTransform { try Transforms.base64GunzipDecode(model.inputText) }
+                }
+                Button("String UnEscape") {
+                    model.runTransform { try Transforms.stringUnescape(model.inputText) }
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+        }
     }
 
     // MARK: - Status
@@ -128,7 +168,24 @@ struct ContentView: View {
 
     @ViewBuilder
     private var outputContent: some View {
-        if model.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+        if let output = model.transformOutput {
+            switch output {
+            case .text(let text):
+                LineNumberedTextView(text: text)
+            case .error(let message):
+                ScrollView {
+                    HStack(spacing: 6) {
+                        Image(systemName: "xmark.octagon.fill").foregroundColor(.red)
+                        Text(message)
+                            .foregroundColor(.red)
+                            .textSelection(.enabled)
+                    }
+                    .font(.system(size: 12, weight: .medium))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(8)
+                }
+            }
+        } else if model.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             ScrollView {
                 Text(" ")
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -199,5 +256,49 @@ struct ContentView: View {
     private func runExtract() {
         _ = model.extract()
         openWindow(id: "result")
+    }
+}
+
+// MARK: - Line-numbered, read-only Transform output view (D4)
+
+/// Read-only, selectable text rendered with a left line-number gutter.
+/// Numbers are 1..N, monospaced, secondary, right-aligned in the gutter.
+private struct LineNumberedTextView: View {
+    let text: String
+
+    private var lines: [String] {
+        // Split keeping empty trailing lines so numbering matches the text.
+        text.components(separatedBy: "\n")
+    }
+
+    private var gutterWidth: CGFloat {
+        let digits = max(2, String(lines.count).count)
+        return CGFloat(digits) * 9 + 12
+    }
+
+    var body: some View {
+        ScrollView([.vertical, .horizontal]) {
+            HStack(alignment: .top, spacing: 8) {
+                VStack(alignment: .trailing, spacing: 0) {
+                    ForEach(Array(lines.enumerated()), id: \.offset) { index, _ in
+                        Text("\(index + 1)")
+                            .font(.system(.body, design: .monospaced))
+                            .foregroundColor(.secondary)
+                            .frame(width: gutterWidth, alignment: .trailing)
+                    }
+                }
+                VStack(alignment: .leading, spacing: 0) {
+                    ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
+                        Text(line.isEmpty ? " " : line)
+                            .font(.system(.body, design: .monospaced))
+                            .textSelection(.enabled)
+                            .fixedSize(horizontal: true, vertical: false)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+            }
+            .padding(8)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
     }
 }
