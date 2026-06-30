@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSONViewer — Free JSON Tool for macOS</title>
+  <meta name="description" content="JSONViewer is a free, open-source, offline JSON formatter, validator, tree viewer and transformer for macOS. Native SwiftUI app for Apple Silicon.">
+  <meta name="keywords" content="JSON, JSON viewer, JSON formatter, JSON validator, macOS, JSONPath, JSON beautifier, JSON minify, gzip, base64, developer tools, Apple Silicon">
+  <meta name="author" content="JSONViewer">
+  <link rel="canonical" href="https://kg1990.github.io/json_viewer/">
+  <link rel="icon" type="image/png" href="assets/icon.png">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="JSONViewer — Free JSON Tool for macOS">
+  <meta property="og:description" content="Free, open-source, offline JSON formatter, validator, tree viewer and transformer for macOS. Native SwiftUI app for Apple Silicon.">
+  <meta property="og:image" content="https://kg1990.github.io/json_viewer/assets/og-image.png">
+  <meta property="og:url" content="https://kg1990.github.io/json_viewer/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="JSONViewer">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="JSONViewer — Free JSON Tool for macOS">
+  <meta name="twitter:description" content="Free, open-source, offline JSON formatter, validator, tree viewer and transformer for macOS.">
+  <meta name="twitter:image" content="https://kg1990.github.io/json_viewer/assets/og-image.png">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "JSONViewer",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "macOS 13.0 or later",
+    "softwareVersion": "1.1.0",
+    "downloadUrl": "https://github.com/kg1990/json_viewer/releases/latest",
+    "url": "https://kg1990.github.io/json_viewer/",
+    "description": "Free, open-source, offline JSON formatter, validator, tree viewer and transformer for macOS. Native SwiftUI app for Apple Silicon.",
+    "isAccessibleForFree": true,
+    "license": "https://github.com/kg1990/json_viewer",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is JSONViewer free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. JSONViewer is completely free and open source. There is no cost, no account, and no subscription."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does JSONViewer work offline?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. JSONViewer runs fully offline and processes everything locally. Your JSON data never leaves your machine."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I extract a field from a JSON array?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Use the JSONPath-subset extractor. For example, $[*].id returns the id of every element in the top-level array, and $.users[*].email returns every user email. Results open in a separate window with Copy and Download buttons."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What macOS versions are supported?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "JSONViewer supports macOS 13 or later on Apple Silicon (arm64). It is a native SwiftUI application."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is the gzip output compatible with command-line gzip?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. The Gzip&BASE64Encode and BASE64Decode&Ungzip transforms use real gzip, so the output is interoperable with the system gzip and gunzip command-line tools."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I open an unsigned app on macOS?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The release builds are unsigned arm64 binaries. On first launch, right-click (or Control-click) the app in Finder and choose Open, then confirm in the dialog. After that it opens normally."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What JSON transforms does JSONViewer include?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "JSONViewer includes 9 one-click transforms with line-numbered output: JSON Escape, JSON Unescape, BASE64 Encode, BASE64 Decode, URL Escape, URL Unescape, Gzip&BASE64Encode, BASE64Decode&Ungzip, and String UnEscape."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body data-lang="en">
+
+  <a class="skip-link" href="#main" data-en="Skip to content" data-zh="跳到正文">Skip to content</a>
+
+  <header class="site-header">
+    <nav class="nav" aria-label="Primary">
+      <a class="brand" href="#main">
+        <img src="assets/icon.png" alt="JSONViewer app icon" width="32" height="32">
+        <span class="brand-name">JSONViewer</span>
+      </a>
+      <div class="nav-links">
+        <a href="#features" data-en="Features" data-zh="功能">Features</a>
+        <a href="#showcase" data-en="Interface" data-zh="界面">Interface</a>
+        <a href="#demo" data-en="Demo" data-zh="演示">Demo</a>
+        <a href="#faq" data-en="FAQ" data-zh="常见问题">FAQ</a>
+      </div>
+      <div class="nav-actions">
+        <div class="lang-toggle" role="group" aria-label="Language">
+          <button type="button" data-lang-set="en" aria-pressed="true">EN</button>
+          <button type="button" data-lang-set="zh" aria-pressed="false">中文</button>
+        </div>
+        <a class="btn btn-ghost" href="https://github.com/kg1990/json_viewer" data-en="GitHub" data-zh="GitHub">GitHub</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main">
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-inner">
+        <img class="hero-icon" src="assets/icon.png" alt="JSONViewer app icon" width="120" height="120">
+        <p class="eyebrow">
+          <span data-en="Native · Free · Open source" data-zh="原生 · 免费 · 开源">Native · Free · Open source</span>
+        </p>
+        <h1 data-en="The JSON tool for macOS that never touches the network."
+            data-zh="为 macOS 打造、永不联网的 JSON 工具。">The JSON tool for macOS that never touches the network.</h1>
+        <p class="hero-sub"
+           data-en="Format, validate, explore and transform JSON in a fast, private, native SwiftUI window. Free and open source, built for Apple Silicon."
+           data-zh="在快速、私密的原生 SwiftUI 窗口中格式化、校验、浏览和转换 JSON。免费开源，为 Apple Silicon 打造。">Format, validate, explore and transform JSON in a fast, private, native SwiftUI window. Free and open source, built for Apple Silicon.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="https://github.com/kg1990/json_viewer/releases/latest">
+            <span data-en="Download for macOS" data-zh="下载 macOS 版">Download for macOS</span>
+          </a>
+          <a class="btn btn-ghost" href="https://github.com/kg1990/json_viewer">
+            <span data-en="View on GitHub" data-zh="在 GitHub 查看">View on GitHub</span>
+          </a>
+        </div>
+        <p class="hero-meta"
+           data-en="macOS 13+ · Apple Silicon · v1.1.0 · unsigned (right-click → Open)"
+           data-zh="macOS 13+ · Apple Silicon · v1.1.0 · 未签名（右键 → 打开）">macOS 13+ · Apple Silicon · v1.1.0 · unsigned (right-click → Open)</p>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section id="features" class="section">
+      <div class="container">
+        <p class="section-eyebrow" data-en="What it does" data-zh="它能做什么">What it does</p>
+        <h2 class="section-title" data-en="Everything you need for JSON, nothing you don't."
+            data-zh="JSON 该有的功能都在，多余的都没有。">Everything you need for JSON, nothing you don't.</h2>
+        <div class="feature-list">
+          <article class="feature">
+            <h3 data-en="Format &amp; minify" data-zh="格式化与压缩">Format &amp; minify</h3>
+            <p data-en="Beautify with 2-space, 4-space or Tab indentation, or minify to a single compact line."
+               data-zh="支持 2 空格、4 空格或 Tab 缩进的美化，也可压缩为单行。">Beautify with 2-space, 4-space or Tab indentation, or minify to a single compact line.</p>
+          </article>
+          <article class="feature">
+            <h3 data-en="Validate with line:column" data-zh="精确到行列的校验">Validate with line:column</h3>
+            <p data-en="Catch syntax errors instantly with precise line and column reporting — no guessing."
+               data-zh="即时发现语法错误，精确报告出错的行与列，无需猜测。">Catch syntax errors instantly with precise line and column reporting — no guessing.</p>
+          </article>
+          <article class="feature">
+            <h3 data-en="Syntax highlight &amp; tree" data-zh="语法高亮与树视图">Syntax highlight &amp; tree</h3>
+            <p data-en="Read JSON with colored syntax highlighting, or navigate nested data in a collapsible tree."
+               data-zh="以彩色语法高亮阅读 JSON，或在可折叠树视图中浏览嵌套数据。">Read JSON with colored syntax highlighting, or navigate nested data in a collapsible tree.</p>
+          </article>
+          <article class="feature">
+            <h3 data-en="JSONPath extraction" data-zh="JSONPath 提取">JSONPath extraction</h3>
+            <p data-en="Pull values with a JSONPath subset like $[*].id or $.users[*].email — results open with Copy &amp; Download."
+               data-zh="用 JSONPath 子集（如 $[*].id 或 $.users[*].email）提取数据，结果窗口可复制与下载。">Pull values with a JSONPath subset like $[*].id or $.users[*].email — results open with Copy &amp; Download.</p>
+          </article>
+          <article class="feature">
+            <h3 data-en="9 transforms" data-zh="9 种转换">9 transforms</h3>
+            <p data-en="One-click JSON escape, Base64, URL encode and real gzip — each with line-numbered output."
+               data-zh="一键完成 JSON 转义、Base64、URL 编码和真实 gzip，输出均带行号。">One-click JSON escape, Base64, URL encode and real gzip — each with line-numbered output.</p>
+          </article>
+          <article class="feature">
+            <h3 data-en="Offline &amp; private" data-zh="离线且私密">Offline &amp; private</h3>
+            <p data-en="Runs entirely on your Mac. Your data never leaves the machine — no servers, no telemetry."
+               data-zh="完全在你的 Mac 上运行。数据永不离开本机——无服务器、无遥测。">Runs entirely on your Mac. Your data never leaves the machine — no servers, no telemetry.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- UI SHOWCASE -->
+    <section id="showcase" class="section section-alt">
+      <div class="container">
+        <p class="section-eyebrow" data-en="The interface" data-zh="界面一览">The interface</p>
+        <h2 class="section-title" data-en="A real native window, not a browser tab."
+            data-zh="真正的原生窗口，而非浏览器标签页。">A real native window, not a browser tab.</h2>
+
+        <div class="app-mockup" role="img"
+             aria-label="JSONViewer macOS app window showing a syntax-highlighted JSON document, toolbar, tree view and transform tools">
+          <div class="window-chrome">
+            <span class="dot dot-red">&#8203;</span>
+            <span class="dot dot-yellow">&#8203;</span>
+            <span class="dot dot-green">&#8203;</span>
+            <span class="window-title">JSONViewer — sample.json</span>
+          </div>
+          <div class="app-toolbar">
+            <button type="button" class="tool-btn tool-primary">Beautify</button>
+            <button type="button" class="tool-btn">Minify</button>
+            <button type="button" class="tool-btn">Validate</button>
+            <button type="button" class="tool-btn">Clear</button>
+            <span class="toolbar-spacer">&#8203;</span>
+            <span class="indent-picker">
+              <span class="seg seg-active">2 Spaces</span><span class="seg">4 Spaces</span><span class="seg">Tab</span>
+            </span>
+          </div>
+          <div class="app-body">
+            <pre class="code-pane" aria-hidden="true"><span class="ln">1</span><span class="p">{</span>
+<span class="ln">2</span>  <span class="k">"app"</span><span class="p">:</span> <span class="s">"JSONViewer"</span><span class="p">,</span>
+<span class="ln">3</span>  <span class="k">"version"</span><span class="p">:</span> <span class="n">1.1</span><span class="p">,</span>
+<span class="ln">4</span>  <span class="k">"offline"</span><span class="p">:</span> <span class="n">true</span><span class="p">,</span>
+<span class="ln">5</span>  <span class="k">"users"</span><span class="p">:</span> <span class="p">[</span>
+<span class="ln">6</span>    <span class="p">{</span> <span class="k">"id"</span><span class="p">:</span> <span class="n">1</span><span class="p">,</span> <span class="k">"email"</span><span class="p">:</span> <span class="s">"a@b.dev"</span> <span class="p">},</span>
+<span class="ln">7</span>    <span class="p">{</span> <span class="k">"id"</span><span class="p">:</span> <span class="n">2</span><span class="p">,</span> <span class="k">"email"</span><span class="p">:</span> <span class="s">"c@d.dev"</span> <span class="p">}</span>
+<span class="ln">8</span>  <span class="p">]</span>
+<span class="ln">9</span><span class="p">}</span></pre>
+            <div class="tree-pane" aria-hidden="true">
+              <div class="tree-row"><span class="tw">▾</span><span class="p">{ } root</span></div>
+              <div class="tree-row indent-1"><span class="k">app</span><span class="p">:</span> <span class="s">"JSONViewer"</span></div>
+              <div class="tree-row indent-1"><span class="k">version</span><span class="p">:</span> <span class="n">1.1</span></div>
+              <div class="tree-row indent-1"><span class="tw">▾</span><span class="k">users</span> <span class="p">[2]</span></div>
+              <div class="tree-row indent-2"><span class="tw">▸</span><span class="p">{ } 0</span></div>
+              <div class="tree-row indent-2"><span class="tw">▸</span><span class="p">{ } 1</span></div>
+            </div>
+          </div>
+          <div class="transform-row" aria-label="Transform tools">
+            <span class="xform">JSON Escape</span>
+            <span class="xform">JSON Unescape</span>
+            <span class="xform">BASE64 Encode</span>
+            <span class="xform">BASE64 Decode</span>
+            <span class="xform">URL Escape</span>
+            <span class="xform">URL Unescape</span>
+            <span class="xform">Gzip&amp;BASE64Encode</span>
+            <span class="xform">BASE64Decode&amp;Ungzip</span>
+            <span class="xform">String UnEscape</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LIVE DEMO -->
+    <section id="demo" class="section">
+      <div class="container">
+        <p class="section-eyebrow" data-en="Try it here" data-zh="在线试用">Try it here</p>
+        <h2 class="section-title" data-en="Format JSON right in your browser."
+            data-zh="直接在浏览器里格式化 JSON。">Format JSON right in your browser.</h2>
+        <p class="section-lead"
+           data-en="A taste of the app — runs entirely in your browser, nothing is uploaded. The desktop app does much more."
+           data-zh="应用功能的预览——完全在浏览器中运行，不会上传任何内容。桌面版功能更强大。">A taste of the app — runs entirely in your browser, nothing is uploaded. The desktop app does much more.</p>
+
+        <div class="demo">
+          <div class="demo-col">
+            <label class="demo-label" for="demo-input" data-en="Input JSON" data-zh="输入 JSON">Input JSON</label>
+            <textarea id="demo-input" spellcheck="false" aria-label="JSON input">{"app":"JSONViewer","version":1.1,"offline":true,"users":[{"id":1,"email":"a@b.dev"},{"id":2,"email":"c@d.dev"}]}</textarea>
+            <div class="demo-controls">
+              <button type="button" id="demo-beautify" class="btn btn-primary btn-sm" data-en="Beautify" data-zh="美化">Beautify</button>
+              <button type="button" id="demo-minify" class="btn btn-ghost btn-sm" data-en="Minify" data-zh="压缩">Minify</button>
+              <label class="demo-indent-label" for="demo-indent" data-en="Indent" data-zh="缩进">Indent</label>
+              <select id="demo-indent" aria-label="Indent style">
+                <option value="2">2</option>
+                <option value="4">4</option>
+                <option value="tab">Tab</option>
+              </select>
+            </div>
+          </div>
+          <div class="demo-col">
+            <label class="demo-label" for="demo-output" data-en="Output" data-zh="输出">Output</label>
+            <pre id="demo-output" class="demo-output" aria-live="polite" tabindex="0"></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXTRACTION SYNTAX -->
+    <section class="section section-alt">
+      <div class="container">
+        <p class="section-eyebrow" data-en="JSONPath subset" data-zh="JSONPath 子集">JSONPath subset</p>
+        <h2 class="section-title" data-en="Extract exactly the values you need."
+            data-zh="精准提取所需的值。">Extract exactly the values you need.</h2>
+        <p class="section-lead"
+           data-en="Type a path; matching values open in a separate window with Copy and Download."
+           data-zh="输入路径，匹配的值会在单独的窗口中打开，并提供复制与下载。">Type a path; matching values open in a separate window with Copy and Download.</p>
+        <div class="syntax-grid">
+          <div class="syntax-item"><code>$[*].id</code><span data-en="The id of every element in a top-level array" data-zh="顶层数组中每个元素的 id">The id of every element in a top-level array</span></div>
+          <div class="syntax-item"><code>$.users[*].email</code><span data-en="Every email under the users array" data-zh="users 数组下的所有 email">Every email under the users array</span></div>
+          <div class="syntax-item"><code>$.a.b[*].x</code><span data-en="Field x across a nested array" data-zh="嵌套数组中各项的 x 字段">Field x across a nested array</span></div>
+          <div class="syntax-item"><code>[index]</code><span data-en="A single array element by position" data-zh="按位置取单个数组元素">A single array element by position</span></div>
+          <div class="syntax-item"><code>['key']</code><span data-en="A property by quoted key name" data-zh="按带引号的键名取属性">A property by quoted key name</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="section">
+      <div class="container container-narrow">
+        <p class="section-eyebrow" data-en="FAQ" data-zh="常见问题">FAQ</p>
+        <h2 class="section-title" data-en="Questions, answered." data-zh="常见问题解答">Questions, answered.</h2>
+        <dl class="faq">
+          <dt class="faq-q" data-en="Is JSONViewer free?" data-zh="JSONViewer 免费吗？">Is JSONViewer free?</dt>
+          <dd class="faq-a" data-en="Yes. JSONViewer is completely free and open source. There is no cost, no account, and no subscription."
+              data-zh="是的。JSONViewer 完全免费且开源，无需付费、无需账户、无需订阅。">Yes. JSONViewer is completely free and open source. There is no cost, no account, and no subscription.</dd>
+
+          <dt class="faq-q" data-en="Does JSONViewer work offline?" data-zh="JSONViewer 可以离线使用吗？">Does JSONViewer work offline?</dt>
+          <dd class="faq-a" data-en="Yes. JSONViewer runs fully offline and processes everything locally. Your JSON data never leaves your machine."
+              data-zh="可以。JSONViewer 完全离线运行，所有处理都在本地完成。你的 JSON 数据永不离开本机。">Yes. JSONViewer runs fully offline and processes everything locally. Your JSON data never leaves your machine.</dd>
+
+          <dt class="faq-q" data-en="How do I extract a field from a JSON array?" data-zh="如何从 JSON 数组中提取某个字段？">How do I extract a field from a JSON array?</dt>
+          <dd class="faq-a" data-en="Use the JSONPath-subset extractor. For example, $[*].id returns the id of every element in the top-level array, and $.users[*].email returns every user email. Results open in a separate window with Copy and Download buttons."
+              data-zh="使用 JSONPath 子集提取器。例如 $[*].id 返回顶层数组中每个元素的 id，$.users[*].email 返回所有用户的 email。结果会在单独窗口中打开，带有复制与下载按钮。">Use the JSONPath-subset extractor. For example, $[*].id returns the id of every element in the top-level array, and $.users[*].email returns every user email. Results open in a separate window with Copy and Download buttons.</dd>
+
+          <dt class="faq-q" data-en="What macOS versions are supported?" data-zh="支持哪些 macOS 版本？">What macOS versions are supported?</dt>
+          <dd class="faq-a" data-en="JSONViewer supports macOS 13 or later on Apple Silicon (arm64). It is a native SwiftUI application."
+              data-zh="JSONViewer 支持 macOS 13 及更高版本，运行于 Apple Silicon（arm64）。它是原生 SwiftUI 应用。">JSONViewer supports macOS 13 or later on Apple Silicon (arm64). It is a native SwiftUI application.</dd>
+
+          <dt class="faq-q" data-en="Is the gzip output compatible with command-line gzip?" data-zh="gzip 输出与命令行 gzip 兼容吗？">Is the gzip output compatible with command-line gzip?</dt>
+          <dd class="faq-a" data-en="Yes. The Gzip&amp;BASE64Encode and BASE64Decode&amp;Ungzip transforms use real gzip, so the output is interoperable with the system gzip and gunzip command-line tools."
+              data-zh="兼容。Gzip&amp;BASE64Encode 与 BASE64Decode&amp;Ungzip 转换使用真实的 gzip，因此输出可与系统的 gzip / gunzip 命令行工具互操作。">Yes. The Gzip&amp;BASE64Encode and BASE64Decode&amp;Ungzip transforms use real gzip, so the output is interoperable with the system gzip and gunzip command-line tools.</dd>
+
+          <dt class="faq-q" data-en="How do I open an unsigned app on macOS?" data-zh="如何在 macOS 上打开未签名的应用？">How do I open an unsigned app on macOS?</dt>
+          <dd class="faq-a" data-en="The release builds are unsigned arm64 binaries. On first launch, right-click (or Control-click) the app in Finder and choose Open, then confirm in the dialog. After that it opens normally."
+              data-zh="发布版本是未签名的 arm64 程序。首次启动时，在 Finder 中右键（或按住 Control 点击）应用并选择「打开」，然后在弹窗中确认。之后即可正常打开。">The release builds are unsigned arm64 binaries. On first launch, right-click (or Control-click) the app in Finder and choose Open, then confirm in the dialog. After that it opens normally.</dd>
+        </dl>
+      </div>
+    </section>
+
+    <!-- DOWNLOAD -->
+    <section id="download" class="section section-cta">
+      <div class="container container-narrow center">
+        <h2 class="section-title" data-en="Get JSONViewer for macOS." data-zh="获取 macOS 版 JSONViewer。">Get JSONViewer for macOS.</h2>
+        <p class="section-lead"
+           data-en="Free and open source. Download the latest release — DMG or ZIP — for Apple Silicon."
+           data-zh="免费开源。下载最新版本——DMG 或 ZIP——适用于 Apple Silicon。">Free and open source. Download the latest release — DMG or ZIP — for Apple Silicon.</p>
+        <div class="hero-cta center-cta">
+          <a class="btn btn-primary" href="https://github.com/kg1990/json_viewer/releases/latest">
+            <span data-en="Download latest release" data-zh="下载最新版本">Download latest release</span>
+          </a>
+          <a class="btn btn-ghost" href="https://github.com/kg1990/json_viewer">
+            <span data-en="View source on GitHub" data-zh="在 GitHub 查看源码">View source on GitHub</span>
+          </a>
+        </div>
+        <p class="hero-meta"
+           data-en="JSONViewer-1.1.0.dmg / JSONViewer-1.1.0.zip · arm64 · unsigned (right-click → Open)"
+           data-zh="JSONViewer-1.1.0.dmg / JSONViewer-1.1.0.zip · arm64 · 未签名（右键 → 打开）">JSONViewer-1.1.0.dmg / JSONViewer-1.1.0.zip · arm64 · unsigned (right-click → Open)</p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <img src="assets/icon.png" alt="JSONViewer app icon" width="28" height="28">
+        <span class="brand-name">JSONViewer</span>
+      </div>
+      <p class="footer-note"
+         data-en="Free, open-source, offline JSON tool for macOS. Your data never leaves your machine."
+         data-zh="免费、开源、离线的 macOS JSON 工具。你的数据永不离开本机。">Free, open-source, offline JSON tool for macOS. Your data never leaves your machine.</p>
+      <div class="footer-links">
+        <a href="https://github.com/kg1990/json_viewer" data-en="GitHub" data-zh="GitHub">GitHub</a>
+        <a href="https://github.com/kg1990/json_viewer/releases/latest" data-en="Download" data-zh="下载">Download</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

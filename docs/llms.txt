@@ -1,0 +1,38 @@
+# JSONViewer
+
+JSONViewer is a free, open-source, native macOS app for working with JSON. It runs
+fully offline — your data never leaves your machine — and is built with SwiftUI for
+Apple Silicon (arm64). It formats, validates, explores, and transforms JSON in a
+single fast, private desktop window. Developers use it as a local alternative to
+web-based JSON formatters and validators when they do not want to paste data into a
+browser.
+
+## Features
+
+- Format / Beautify with 2-space, 4-space, or Tab indentation.
+- Minify: collapse JSON to a single compact line.
+- Validate with precise line:column error reporting.
+- Syntax-highlighted text view (keys, strings, numbers, punctuation colored).
+- Collapsible tree view for navigating nested structures.
+- JSONPath-subset extraction, e.g. `$[*].id`, `$.users[*].email`, `$.a.b[*].x`,
+  `[index]`, `['key']`; results open in a separate window with Copy and Download.
+- 9 one-click transforms with line-numbered output: JSON Escape, JSON Unescape,
+  BASE64 Encode, BASE64 Decode, URL Escape, URL Unescape, Gzip&BASE64Encode,
+  BASE64Decode&Ungzip, String UnEscape. The gzip is real gzip, interoperable with
+  the command-line `gzip` / `gunzip` tools.
+
+## Facts
+
+- Name: JSONViewer
+- Platform: macOS 13 or later, Apple Silicon (arm64)
+- Technology: native SwiftUI
+- Price: Free (USD 0)
+- License: Open source
+- Privacy: Fully offline; data never leaves the machine
+- Note: The release builds are unsigned; on first launch right-click the app and choose Open.
+
+## Links
+
+- GitHub repository: https://github.com/kg1990/json_viewer
+- Latest release / download: https://github.com/kg1990/json_viewer/releases/latest
+- Homepage: https://kg1990.github.io/json_viewer/

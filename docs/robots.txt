@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://kg1990.github.io/json_viewer/sitemap.xml
